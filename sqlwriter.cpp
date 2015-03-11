@@ -83,7 +83,7 @@ void SQLWriter::addPlayer(Player p){
     query.exec(qcommand);
 }
 
-bool SQLWriter::createConnection(QString pass, dbInfo info)
+bool SQLWriter::createConnection(QString pass)
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
     db.setHostName("localhost");

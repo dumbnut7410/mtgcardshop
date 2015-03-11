@@ -25,5 +25,4 @@ HEADERS += \
     sqlwriter.h \
     player.h \
     inventoryItem.h \
-    transaction.h \
-    dbinfo.h
+    transaction.h

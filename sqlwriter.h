@@ -9,7 +9,6 @@
 #include <string>
 #include "transaction.h"
 #include "inventoryItem.h"
-#include "dbinfo.h"
 
 std::string getpass(const char*, bool);
 int getch(void);
@@ -18,7 +17,7 @@ QString convertToQstring(std::string);
 class SQLWriter
 {
 public:
-    SQLWriter(dbInfo info);
+    SQLWriter();
     ~SQLWriter();
 
     void listPossibleItems(void);
@@ -38,7 +37,7 @@ public:
 private:
 
     int getPlayerID(std::string);
-    bool createConnection(QString pass, dbInfo info);
+    bool createConnection(QString pass);
 };
 
 #endif // SQLWRITER_H

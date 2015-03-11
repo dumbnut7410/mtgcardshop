@@ -7,8 +7,8 @@
 #include "player.h"
 #include "sqlwriter.h"
 #include "inventoryItem.h"
-#include "dbinfo.h"
-#include <fstream>
+
+SQLWriter *writer;
 
 /**
  * @brief hashString hashes the string (copy/pasted)
@@ -20,11 +20,10 @@ constexpr unsigned int hashString(const char* str, int h = 0){
     return !str[h] ? 5381 : (hashString(str, h+1)*33) ^ str[h];
 }
 
-SQLWriter* writer;
-void fixUserInput(){
-    std::cin.clear();
-    std::cin.ignore(9001, '\n');
 
+void fixUserInput(){
+    std::cin.ignore(0,9001);
+    std::cin.clear();
 }
 
 /**
@@ -189,16 +188,6 @@ void handleElo(){
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-
-    dbInfo info;
-    std::ifstream file;
-    std::string line;
-
-    file.open("config.jim");
-    while(!file.eof){
-
-    }
-
 
     writer = new SQLWriter();
     std::string input;
