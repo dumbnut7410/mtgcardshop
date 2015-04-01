@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
                       << "sell \n"
                       << "addplayer \n"
                       << "pnl \n"
-                      << "transaction \n"
+                      << "transactions \n"
                       << "playerlookup"
                       << std::endl;
             break;
