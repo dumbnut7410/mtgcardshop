@@ -13,7 +13,7 @@ SQLWriter::SQLWriter()
             passQString.append(c);
         }
 
-        if(createConnection(passQString)){
+        if(this->createConnection(passQString)){
             std::cout << "Connected successfully!" << std::endl;
             break;
         } else{
@@ -41,7 +41,7 @@ void SQLWriter::listPossibleItems(){
 void SQLWriter::addItemToInventory(inventoryItem item){
     QSqlQuery query;
 
-    std::string command = "INSERT INTO `mtg_card_shop`.`inventory` (`id`,`product_id`, "
+    std::string command = "INSERT INTO `inventory` (`id`,`product_id`, "
                           "`buy_price`, `quantity`, `original_qty`) VALUES (NULL, '";
     command.append(std::to_string(item.id));
     command.append("', '");
@@ -58,7 +58,7 @@ void SQLWriter::addItemToInventory(inventoryItem item){
 int SQLWriter::addItemToDB(QString str){
     QSqlQuery query;
 
-    QString command = "INSERT INTO `mtg_card_shop`.`products` (`id`, `name`) VALUES (NULL, '";
+    QString command = "INSERT INTO `products` (`id`, `name`) VALUES (NULL, '";
     command.append(str);
     command.append("')");
     query.exec(command);
@@ -72,24 +72,28 @@ int SQLWriter::addItemToDB(QString str){
     return query.value(0).toInt();
 }
 
-void SQLWriter::addPlayer(Player p){
+bool SQLWriter::addPlayer(Player p){
     QSqlQuery query;
-    std::string command = "INSERT INTO `mtg_card_shop`.`players` (`id`, `name`, `elo`) VALUES (NULL, '";
+    std::string command = "INSERT INTO `players` (`id`, `name`, `elo`) VALUES (NULL, '";
     command.append(p.name);
     command.append("', '");
     command.append(std::to_string(p.elo));
     command.append("');");
     QString qcommand = convertToQstring(command);
-    query.exec(qcommand);
+    bool ans = query.exec(qcommand);
+
+    if(!ans)
+        std::cout << query.lastError().text().toStdString() << std::endl;
+    return ans;
 }
 
 bool SQLWriter::createConnection(QString pass)
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-    db.setHostName("localhost");
-    db.setDatabaseName("mtg_card_shop");
-    db.setUserName("root");
-    db.setPassword(pass);
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+//    db.setHostName("~/Desktop/cards.db");
+    db.setDatabaseName("/home/gilderjw/Desktop/cards.db");
+//    db.setUserName("root");
+//    db.setPassword(pass);
     if (!db.open()) {
         return false;
     }
@@ -159,7 +163,9 @@ int SQLWriter::getPlayerID(std::string name){
     QString command = "SELECT `id` FROM `players` WHERE `name` LIKE '";
     command.append(convertToQstring(name));
     command.append("'");
-    query.exec(command);
+    if(query.exec(command)){
+        std::cout << query.lastError().text().toStdString() << std::endl;
+    }
     if(!query.next()){
         std::cout << "player not found, create?" << std::endl;
         std::string ans;
@@ -191,18 +197,26 @@ void SQLWriter::listInventory(){
     QSqlQuery query;
     query.exec("SELECT `product_id` , `quantity`, `id` FROM `inventory` WHERE `quantity` > 0");
 
-    int ids[query.size()];
-    int qty[query.size()];
-    int inventoryId[query.size()];
+    std::vector<int> ids;
+    std::vector<int> qty;
+    std::vector<int> inventoryId;
+//    int ids[query.size()];
+//    int qty[query.size()];
+//    int inventoryId[query.size()];
+
     QString lookupItemNameCommand = "SELECT * FROM `products` WHERE `id` = ";
 
     std::map <int, std::string> names;//names of items and productids
 
     int index = 0;
     while(query.next()){
-        ids[index] = query.value(0).toInt();
-        qty[index] = query.value(1).toInt();
-        inventoryId[index] = query.value(2).toInt();
+        ids.push_back(query.value(0).toInt());
+        qty.push_back(query.value(1).toInt());
+        inventoryId.push_back(query.value(2).toInt());
+
+//        ids[index] = query.value(0).toInt();
+//        qty[index] = query.value(1).toInt();
+//        inventoryId[index] = query.value(2).toInt();
         if(index != 0)
             lookupItemNameCommand.append(" OR `id` = ");
 
@@ -219,7 +233,9 @@ void SQLWriter::listInventory(){
         index++;
     }
 
-    for(unsigned int i = 0; i < (sizeof(ids)/sizeof(*ids)); i++){ //print info
+//    for(unsigned int i = 0; i < (sizeof(ids)/sizeof(*ids)); i++){ //print info
+
+      for(int i = 0; i < ids.size(); i++){
         int lineLength = 28;
         lineLength -= names[ids[i]].length();
         lineLength -= std::to_string(qty[i]).length();
@@ -269,7 +285,8 @@ void SQLWriter::listTransactions(){
     QString command = "SELECT * FROM `transactions`";
     query.exec(command);
 
-    transaction xactions[query.size()];//array of transactions
+    std::vector<transaction> xactions;
+//    transaction xactions[query.size()];//array of transactions
     std::map<int, std::string> products; //map of products and ids
     std::map<int, std::string> players; //map of players
     int index = 0;
@@ -281,7 +298,8 @@ void SQLWriter::listTransactions(){
         t.qty = query.value(3).toInt();
         t.totalPrice = query.value(4).toInt();
         t.dateTime = query.value(5).toDateTime();
-        xactions[index] = t;
+//        xactions[index] = t;
+        xactions.push_back(t);
         index++;
     }
 
@@ -328,7 +346,7 @@ int SQLWriter::listExpenses(std::string playerName, bool print){
     command.append(convertToQstring(std::to_string(playerId)));
     query.exec(command);
 
-    transaction xactions[query.size()];//array of transactions
+    std::vector<transaction> xactions; //array of transactions
     std::map<int, std::string> products; //map of products and ids
 
     int index = 0;
@@ -340,7 +358,7 @@ int SQLWriter::listExpenses(std::string playerName, bool print){
         t.qty = query.value(3).toInt();
         t.totalPrice = query.value(4).toInt();
         t.dateTime = query.value(5).toDateTime();
-        xactions[index] = t;
+        xactions.push_back(t);
         index++;
         total+=t.totalPrice;
     }

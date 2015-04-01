@@ -50,14 +50,16 @@ void addPlayer(){
     p.name = playerName;
     p.elo = elo;
 
-    writer->addPlayer(p);
-    std::cout << "Adding player: " << playerName << " with starting elo: " << elo << std::endl;
+    if(writer->addPlayer(p))
+        std::cout << "Adding player: " << playerName << " with starting elo: " << elo << std::endl;
+    else
+        std::cout << "operation failed" << std::endl;
 }
 int addItemToDB(){
     char name[16];
 
     std::cout << "new item name: ";
-    fixUserInput();
+    std::cin.ignore();
     std::cin.getline(name, 16);
     std::string itemName = name;
     return writer->addItemToDB(convertToQstring(itemName));

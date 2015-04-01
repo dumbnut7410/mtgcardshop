@@ -23,7 +23,7 @@ public:
     void listPossibleItems(void);
     void addItemToInventory(inventoryItem);
     int addItemToDB(QString str);
-    void addPlayer(Player);
+    bool addPlayer(Player);
     void listInventory();
     bool sellItem(int id, int qty, int price, std::string name);
     int getRevenue();
