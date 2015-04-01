@@ -91,10 +91,11 @@ bool SQLWriter::createConnection(QString pass)
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
 //    db.setHostName("~/Desktop/cards.db");
-    db.setDatabaseName("/home/gilderjw/Desktop/cards.db");
+    db.setDatabaseName("/var/shop/cards.db");
 //    db.setUserName("root");
 //    db.setPassword(pass);
     if (!db.open()) {
+        std::cout << db.lastError().text().toStdString();
         return false;
     }
     return true;
