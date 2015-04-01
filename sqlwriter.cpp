@@ -130,14 +130,14 @@ bool SQLWriter::sellItem(int id, int qty, int price, std::string name){
     //remove qty from stock
     productId = query.value(0).toInt();
     currentQty = query.value(1).toInt();
-    command = "UPDATE  `mtg_card_shop`.`inventory` SET  `quantity` =  '";
+    command = "UPDATE `inventory` SET  `quantity` =  '";
     command.append(convertToQstring(std::to_string(currentQty - qty)));
     command.append("' WHERE  `inventory`.`id` =");
     command.append(convertToQstring(std::to_string(id)));
     query.exec(command);
 
     //add it to the transactions
-    command = "INSERT INTO `mtg_card_shop`.`transactions` (`id`, `player_id`, `item_id`,"
+    command = "INSERT INTO `transactions` (`id`, `player_id`, `item_id`,"
               " `quantity`, `total_price`) VALUES (NULL, '";
     command.append(convertToQstring(std::to_string(playerId)));
     command.append("' , '");
