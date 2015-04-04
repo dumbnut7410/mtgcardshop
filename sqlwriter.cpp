@@ -135,7 +135,9 @@ bool SQLWriter::sellItem(int id, int qty, int price, std::string name){
     command.append(convertToQstring(std::to_string(currentQty - qty)));
     command.append("' WHERE  `inventory`.`id` =");
     command.append(convertToQstring(std::to_string(id)));
-    query.exec(command);
+    if(!query.exec(command)){
+        std::cout << query.lastError().text().toStdString() << std::endl;
+    }
 
     //add it to the transactions
     command = "INSERT INTO `transactions` (`id`, `player_id`, `item_id`,"
@@ -149,9 +151,12 @@ bool SQLWriter::sellItem(int id, int qty, int price, std::string name){
     command.append(convertToQstring(std::to_string(price)));
     command.append("')");
 
-    query.exec(command);
+    bool success = query.exec(command);
 
-    return true;
+    if(!success){
+       std::cout << query.lastError().text().toStdString() << std::endl;
+    }
+    return success;
 }
 
 /**

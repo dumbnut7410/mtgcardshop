@@ -195,6 +195,7 @@ int main(int argc, char *argv[])
     std::string input;
 
     while(true){
+        fixUserInput();
         std::cout << "Enter a command" << std::endl;
         std::cin >> input;
         std::cout << std::endl;

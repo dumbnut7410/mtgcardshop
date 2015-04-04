@@ -14,11 +14,11 @@ CONFIG   -= app_bundle
 CONFIG   += C++11
 TEMPLATE = app
 
-#INCLUDEPATH+= /opt/Qt/Tools/QtCreator/bin/plugins/sqldrivers/libqsqlite.so
-INCLUDEPATH += /usr/local/qt5pi/include/
+INCLUDEPATH+= /opt/Qt/Tools/QtCreator/bin/plugins/sqldrivers/libqsqlite.so
+#INCLUDEPATH += /usr/local/qt5pi/include/
 
-#LIBS += /opt/Qt/Tools/QtCreator/bin/plugins/sqldrivers/libqsqlite.so
-LIBS += /usr/local/qt5pi/plugins/sqldrivers/libqsqlite.so
+LIBS += /opt/Qt/Tools/QtCreator/bin/plugins/sqldrivers/libqsqlite.so
+#LIBS += /usr/local/qt5pi/plugins/sqldrivers/libqsqlite.so
 
 SOURCES += main.cpp \
     sqlwriter.cpp
