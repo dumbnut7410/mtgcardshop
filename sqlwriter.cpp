@@ -2,24 +2,12 @@
 
 SQLWriter::SQLWriter()
 {
-    while(true){
-        std::string pass;
-        pass = getpass("Enter password: ", false);
-
-        QString passQString = QString();
-
-        //this is weird
-        for(char c : pass){
-            passQString.append(c);
-        }
-
-        if(this->createConnection(passQString)){
-            std::cout << "Connected successfully!" << std::endl;
-            break;
-        } else{
-            std::cout << "Could not connect" << std::endl;
-        }
+    if(this->createConnection()){
+        std::cout << "Connected successfully!" << std::endl;
+    } else{
+        std::cout << "Could not connect" << std::endl;
     }
+
 }
 void SQLWriter::listPossibleItems(){
     QSqlQuery query;
@@ -87,7 +75,7 @@ bool SQLWriter::addPlayer(Player p){
     return ans;
 }
 
-bool SQLWriter::createConnection(QString pass)
+bool SQLWriter::createConnection()
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
 //    db.setHostName("~/Desktop/cards.db");

@@ -37,7 +37,7 @@ public:
 private:
 
     int getPlayerID(std::string);
-    bool createConnection(QString pass);
+    bool createConnection();
 };
 
 #endif // SQLWRITER_H
