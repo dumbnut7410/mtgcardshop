@@ -105,6 +105,9 @@ void addItemToInventory(){
     writer->addItemToInventory(ITEM);
 
 }
+void printStandings(){
+    writer->printelostandings();
+}
 
 void sellItem(){
     int itemId, qty;
@@ -229,6 +232,10 @@ int main(int argc, char *argv[])
             handleElo();
             break;
 
+        case hashString("standings"):
+            printStandings();
+            break;
+
         case hashString("help"):
             std::cout << "possible commands: \n"
                       << "additem \n"
@@ -236,7 +243,8 @@ int main(int argc, char *argv[])
                       << "addplayer \n"
                       << "pnl \n"
                       << "transactions \n"
-                      << "playerlookup"
+                      << "playerlookup \n"
+                      << "standings"
                       << std::endl;
             break;
 

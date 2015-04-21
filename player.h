@@ -7,4 +7,6 @@ struct Player{
     std::string name;
     int elo;
 };
+
+
 #endif // PLAYER

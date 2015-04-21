@@ -26,6 +26,27 @@ void SQLWriter::listPossibleItems(){
 
 }
 
+//prints the standings of all players
+void SQLWriter::printelostandings(){
+   QSqlQuery query;
+   QString command = "SELECT `name`, `elo` FROM `players` ORDER BY `elo` DESC";
+   query.exec(command);
+
+   std::vector<Player> players;
+
+   int i = 1;
+   while(query.next()){
+
+       std::string str = std::to_string(i) + ". " + query.value(0).toString().toStdString();
+       std::cout << str;
+       std::cout.width(50 - str.length());
+       std::cout << std::right << query.value(1).toString().toStdString() << "\n";
+       i++;
+   }
+
+
+}
+
 void SQLWriter::addItemToInventory(inventoryItem item){
     QSqlQuery query;
 
@@ -194,9 +215,6 @@ void SQLWriter::listInventory(){
     std::vector<int> ids;
     std::vector<int> qty;
     std::vector<int> inventoryId;
-//    int ids[query.size()];
-//    int qty[query.size()];
-//    int inventoryId[query.size()];
 
     QString lookupItemNameCommand = "SELECT * FROM `products` WHERE `id` = ";
 
@@ -208,9 +226,6 @@ void SQLWriter::listInventory(){
         qty.push_back(query.value(1).toInt());
         inventoryId.push_back(query.value(2).toInt());
 
-//        ids[index] = query.value(0).toInt();
-//        qty[index] = query.value(1).toInt();
-//        inventoryId[index] = query.value(2).toInt();
         if(index != 0)
             lookupItemNameCommand.append(" OR `id` = ");
 
@@ -227,9 +242,7 @@ void SQLWriter::listInventory(){
         index++;
     }
 
-//    for(unsigned int i = 0; i < (sizeof(ids)/sizeof(*ids)); i++){ //print info
-
-      for(int i = 0; i < ids.size(); i++){
+    for(int i = 0; i < ids.size(); i++){
         int lineLength = 28;
         lineLength -= names[ids[i]].length();
         lineLength -= std::to_string(qty[i]).length();
@@ -280,7 +293,6 @@ void SQLWriter::listTransactions(){
     query.exec(command);
 
     std::vector<transaction> xactions;
-//    transaction xactions[query.size()];//array of transactions
     std::map<int, std::string> products; //map of products and ids
     std::map<int, std::string> players; //map of players
     int index = 0;
@@ -292,7 +304,6 @@ void SQLWriter::listTransactions(){
         t.qty = query.value(3).toInt();
         t.totalPrice = query.value(4).toInt();
         t.dateTime = query.value(5).toDateTime();
-//        xactions[index] = t;
         xactions.push_back(t);
         index++;
     }

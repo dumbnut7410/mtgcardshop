@@ -34,6 +34,7 @@ public:
     bool changeElo(std::string, std::string, int);
     bool setElo(int, int);
     int calculateEloChange(int, int, int);
+    void printelostandings();
 private:
 
     int getPlayerID(std::string);
