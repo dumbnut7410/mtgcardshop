@@ -143,13 +143,15 @@ void listPNL(){
     int costs = writer->getCosts();
     int total = revenue - costs;
     int jimExpense = writer->listExpenses("jim", false);
+    int missing = writer->listExpenses("missing", false);
 
     printf("costs: $%.2f \n", costs/100.0);
     printf("revenue: $%.2f \n", revenue/100.0);
     printf("total: $%.2f \n", total/100.0);
 
     printf("jims expenses: $%.2f \n", jimExpense/100.0);
-    printf("new total: $%.2f \n", ((total - jimExpense)/100.0));
+    printf("missing expenses: $%.2f \n", missing/100.0);
+    printf("new total: $%.2f \n", ((total - (jimExpense + missing))/100.0));
 
 }
 
