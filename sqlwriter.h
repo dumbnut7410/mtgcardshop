@@ -35,6 +35,13 @@ public:
     bool setElo(int, int);
     int calculateEloChange(int, int, int);
     void printelostandings();
+
+    bool addEvent(std::string description, std::string items);
+
+    bool removeEvent(int id);
+    void listEvents();
+
+    bool registerForEvent(std::string playerName, int eventID);
 private:
 
     int getPlayerID(std::string);

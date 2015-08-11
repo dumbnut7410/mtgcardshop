@@ -9,6 +9,60 @@ SQLWriter::SQLWriter()
     }
 
 }
+
+bool SQLWriter::addEvent(std::string description, std::string items){
+    QSqlQuery query;
+    std::string command = "INSERT INTO `events` (`description`, `items`) VALUES ('";
+    command.append((description));
+    command.append("', '");
+    command.append((items));
+    command.append("')");
+
+    bool ret = query.exec(convertToQstring(command));
+
+    if(!ret)
+        std::cout << query.lastError().text().toStdString() << std::endl;
+
+
+    return ret;
+
+}
+
+void SQLWriter::listEvents(){
+    QSqlQuery query;
+    std::string command = "SELECT `id`, `description` FROM `events`";
+
+    bool ret = query.exec(convertToQstring(command));
+
+    if(!ret)
+        std::cout << query.lastError().text().toStdString();
+    else
+        while(query.next()){
+            std::cout << query.value(0).toString().toStdString() << ". " << query.value(1).toString().toStdString() << std::endl;
+        }
+}
+
+bool SQLWriter::removeEvent(int id){
+    QSqlQuery query;
+    std::string command = "DELETE FROM `events` WHERE `id`=";
+    command.append(std::to_string(id));
+    bool ret = query.exec(convertToQstring(command));
+
+    if(ret)
+        std::cout << " successfully deleted!" << std::endl;
+    else
+        std::cout << query.lastError().text().toStdString() << std::endl;
+
+}
+
+bool SQLWriter::registerForEvent(std::string playerName, int eventName){
+
+
+}
+
+/**
+ * @brief SQLWriter::listPossibleItems provides a simple list of all items in the database
+ */
 void SQLWriter::listPossibleItems(){
     QSqlQuery query;
 

@@ -7,6 +7,7 @@
 #include "player.h"
 #include "sqlwriter.h"
 #include "inventoryItem.h"
+#include "event.h"
 
 SQLWriter *writer;
 
@@ -24,6 +25,58 @@ constexpr unsigned int hashString(const char* str, int h = 0){
 void fixUserInput(){
     std::cin.ignore(0,9001);
     std::cin.clear();
+}
+
+bool addEvent(){
+    std::string description;
+
+    std::cout << "Enter description: ";
+    std::cin >> description;
+
+    std::cout << "which items are sold with this event? (comma seperated) \n";
+    writer->listPossibleItems();
+
+    std::string items;//comma seperated
+    std::cin >> items;
+
+    writer->addEvent(description, items);
+
+
+}
+
+void handleEvents(){
+
+    std::cout << "What would you like to do: \n"
+              << "add \n"
+              << "remove \n"
+              << "register"
+              << std::endl;
+
+    std::string input;
+    std::cin >> input;
+
+    switch(hashString(input.c_str())){
+    case hashString("add"):
+        addEvent();
+        break;
+
+    case hashString("remove"):
+        int id;
+        do{
+
+            writer->listEvents();
+
+            std::cout << "Event to remove: ";
+
+        } while (!(std::cin >> id));
+
+        writer->removeEvent(id);
+        break;
+
+    case hashString("register"):
+
+        break;
+    }
 }
 
 /**
@@ -194,12 +247,12 @@ void handleElo(){
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+//    QCoreApplication a(argc, argv);
 
     writer = new SQLWriter();
     std::string input;
-
-    while(true){
+    bool exit = true;
+    while(exit){
         fixUserInput();
         std::cout << "Enter a command" << std::endl;
         std::cin >> input;
@@ -238,6 +291,10 @@ int main(int argc, char *argv[])
             printStandings();
             break;
 
+        case hashString("event"):
+            handleEvents();
+            break;
+
         case hashString("help"):
             std::cout << "possible commands: \n"
                       << "additem \n"
@@ -246,7 +303,8 @@ int main(int argc, char *argv[])
                       << "pnl \n"
                       << "transactions \n"
                       << "playerlookup \n"
-                      << "standings"
+                      << "standings \n"
+                      << "event"
                       << std::endl;
             break;
 
@@ -258,11 +316,14 @@ int main(int argc, char *argv[])
             system("clear");
             break;
 
+        case hashString("exit"):
+            exit = false;
+            break;
         default:
             std::cout << "invalid command, snweb" << std::endl;
         }
     }
 
     std::cout << "Application closing" << std::endl;
-    return a.exec();
+//    return a.exec();
 }
