@@ -74,7 +74,22 @@ void handleEvents(){
         break;
 
     case hashString("register"):
+        std::string playerName;
+        int eventId, price;
 
+        std::cout << "Enter name to register: ";
+        std::cin >> playerName;
+
+        do{
+            writer->listEvents();
+            std::cout << "event: ";
+        }while(!(std::cin >> eventId));
+
+        do{
+            std::cout << "price paid: ";
+        } while( !(std::cin >> price));
+
+        writer->registerForEvent(playerName, eventId, price);
         break;
     }
 }
@@ -251,6 +266,7 @@ int main(int argc, char *argv[])
 
     writer = new SQLWriter();
     std::string input;
+    std::string prsipt;
     bool exit = true;
     while(exit){
         fixUserInput();
@@ -258,6 +274,14 @@ int main(int argc, char *argv[])
         std::cin >> input;
         std::cout << std::endl;
         switch(hashString(input.c_str())){
+
+        case hashString("parse"):
+            std::cout << "enter string: ";
+            std::cin >>prsipt;
+            writer->CSVParse(prsipt);
+
+            break;
+
         case hashString("additem"):
             addItemToInventory();
             break;
@@ -294,6 +318,8 @@ int main(int argc, char *argv[])
         case hashString("event"):
             handleEvents();
             break;
+
+
 
         case hashString("help"):
             std::cout << "possible commands: \n"

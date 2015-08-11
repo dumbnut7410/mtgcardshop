@@ -10,6 +10,34 @@ SQLWriter::SQLWriter()
 
 }
 
+/**
+ * @brief SQLWriter::CSVParse parses the comma seperated values
+ * @return array of integers
+ */
+std::vector<int> SQLWriter::CSVParse(std::string ids){
+
+    std::vector<int> idsVector;
+    for(int i = 0; i < ids.length(); i++){
+        char c= '$';
+        std::string tmp = "";
+        int k = 0;
+        while(c != ','){
+            c = ids[i+k];
+            if(c == ',')
+                break;
+
+            tmp += c;
+            k++;
+
+        }
+
+        idsVector.push_back(atoi(tmp.c_str()));
+        i +=k;
+    }
+
+    return idsVector;
+}
+
 bool SQLWriter::addEvent(std::string description, std::string items){
     QSqlQuery query;
     std::string command = "INSERT INTO `events` (`description`, `items`) VALUES ('";
@@ -55,8 +83,33 @@ bool SQLWriter::removeEvent(int id){
 
 }
 
-bool SQLWriter::registerForEvent(std::string playerName, int eventName){
+bool SQLWriter::registerForEvent(std::string playerName, int eventId, int price){
+    QSqlQuery query;
+    std::string command;
+    bool ret;
 
+    int playerid = this->getPlayerID(playerName);
+
+    //check to see if player is already registered
+    command = "SELECT `players` FROM `events` WHERE `id` = ";
+    command.append(std::to_string(eventId));
+
+    ret = query.exec(convertToQstring(command));
+
+    if(!ret){
+        std::cout << query.lastError().text().toStdString() << std::endl;
+        return false;
+    }
+
+    std::string playerCSV = query.value(1).toString().toStdString();
+    std::vector<int> registeredIDS = this->CSVParse(playerCSV);
+
+    for(int i: registeredIDS){
+        if(i == playerid){
+            std::cout << "player already registered." << std::endl;
+            return false;
+        }
+    }
 
 }
 

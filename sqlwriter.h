@@ -41,7 +41,9 @@ public:
     bool removeEvent(int id);
     void listEvents();
 
-    bool registerForEvent(std::string playerName, int eventID);
+    bool registerForEvent(std::string playerName, int eventID, int price);
+
+    std::vector<int> CSVParse(std::string ids);
 private:
 
     int getPlayerID(std::string);
