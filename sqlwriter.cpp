@@ -17,7 +17,7 @@ SQLWriter::SQLWriter()
 std::vector<int> SQLWriter::CSVParse(std::string ids){
 
     std::vector<int> idsVector;
-    for(int i = 0; i < ids.length(); i++){
+    for(unsigned int i = 0; i < ids.length(); i++){
         char c= '$';
         std::string tmp = "";
         int k = 0;
@@ -40,7 +40,21 @@ std::vector<int> SQLWriter::CSVParse(std::string ids){
 
 bool SQLWriter::addEvent(std::string description, std::string items){
     QSqlQuery query;
-    std::string command = "INSERT INTO `events` (`description`, `items`) VALUES ('";
+    std::string command;
+
+    //checking for unique name
+    command = "SELECT * from `events` WHERE `description` LIKE \"";
+    command.append(description);
+    command.append("\"");
+    query.exec(convertToQstring(command));
+
+    if(query.first()){
+        std::cout << "need unique event name" << std::endl;
+        return false;
+    }
+
+
+    command = "INSERT INTO `events` (`description`, `items`) VALUES ('";
     command.append((description));
     command.append("', '");
     command.append((items));
@@ -51,6 +65,8 @@ bool SQLWriter::addEvent(std::string description, std::string items){
     if(!ret)
         std::cout << query.lastError().text().toStdString() << std::endl;
 
+    /* create an item in the shop */
+    this->addItemToDB(convertToQstring(description));
 
     return ret;
 
@@ -72,7 +88,7 @@ void SQLWriter::listEvents(){
 
 bool SQLWriter::removeEvent(int id){
     QSqlQuery query;
-    std::string command = "DELETE FROM `events` WHERE `id`=";
+    std::string command = "DELETE FROM `events` WHERE `id` = ";
     command.append(std::to_string(id));
     bool ret = query.exec(convertToQstring(command));
 
@@ -81,27 +97,30 @@ bool SQLWriter::removeEvent(int id){
     else
         std::cout << query.lastError().text().toStdString() << std::endl;
 
+    return true;
 }
 
 bool SQLWriter::registerForEvent(std::string playerName, int eventId, int price){
     QSqlQuery query;
     std::string command;
-    bool ret;
 
     int playerid = this->getPlayerID(playerName);
 
-    //check to see if player is already registered
+    /*check to see if player is already registered*/
+
     command = "SELECT `players` FROM `events` WHERE `id` = ";
     command.append(std::to_string(eventId));
 
-    ret = query.exec(convertToQstring(command));
+    bool ret = query.exec(convertToQstring(command));
 
     if(!ret){
         std::cout << query.lastError().text().toStdString() << std::endl;
         return false;
     }
 
-    std::string playerCSV = query.value(1).toString().toStdString();
+    query.first();//not sure, this prevents an error from occuring on the next line
+
+    std::string playerCSV = query.value(0).toString().toStdString();
     std::vector<int> registeredIDS = this->CSVParse(playerCSV);
 
     for(int i: registeredIDS){
@@ -111,6 +130,51 @@ bool SQLWriter::registerForEvent(std::string playerName, int eventId, int price)
         }
     }
 
+    /* actually register the player */
+    playerCSV.append(",");
+    playerCSV.append(std::to_string(playerid));
+    command = "UPDATE `events` SET `players` = '";
+    command.append(playerCSV);
+    command.append("' WHERE `events`.`id` = ");
+    command.append(std::to_string(eventId));
+
+    query.exec(convertToQstring(command));
+
+    /* charge the player */
+
+
+
+    //get event description to find the product
+    command = "SELECT `description` FROM `events` WHERE `id` = ";
+    command.append(std::to_string(eventId));
+    ret = query.exec(convertToQstring(command));
+
+    if(!ret){
+        std::cout << query.lastError().text().toStdString() << std::endl;
+        return false;
+    }
+    query.first();
+    std::string description = query.value(0).toString().toStdString();
+
+
+    //get product id
+    command = "SELECT `id` FROM `products` WHERE `name` LIKE \"";
+    command.append(description);
+    command.append("\"");
+
+    ret = query.exec(convertToQstring(command));
+
+    if(!ret){
+        std::cout << query.lastError().text().toStdString() << std::endl;
+        return false;
+    }
+    query.first();
+    int productID = query.value(0).toInt();
+    this->sellItem(0,1,price,playerName, productID);
+
+
+
+    return true;
 }
 
 /**
@@ -154,6 +218,10 @@ void SQLWriter::printelostandings(){
 
 }
 
+/**
+ * @brief SQLWriter::addItemToInventory adds an item to the inventory table, only needed if inventory is tracked
+ * @param item
+ */
 void SQLWriter::addItemToInventory(inventoryItem item){
     QSqlQuery query;
 
@@ -171,6 +239,11 @@ void SQLWriter::addItemToInventory(inventoryItem item){
 
 }
 
+/**
+ * @brief SQLWriter::addItemToDB adds the item to the products table, necessary if item is included in a transaction
+ * @param str name of item to add
+ * @return id number of the new item
+ */
 int SQLWriter::addItemToDB(QString str){
     QSqlQuery query;
 
@@ -219,40 +292,50 @@ bool SQLWriter::createConnection()
 
 /**
  * @brief SQLWriter::sellItem removes items from quantity and adds transaction
- * @param id table id for inventory
+ * @param id table id for inventory (0 for not in inventory)
  * @param qty amount to remove
+ * @param price of the sale
+ * @param name name of the player
+ * @param productID optional parameter used when selling an item that is not in inventory
  * @return true if the action was successful, false otherwise
  */
-bool SQLWriter::sellItem(int id, int qty, int price, std::string name){
+bool SQLWriter::sellItem(int id, int qty, int price, std::string name, int productID){
     QSqlQuery query;
-    QString command = "SELECT `product_id`, `quantity` FROM `inventory` WHERE `id` = ";
-    command.append(convertToQstring(std::to_string(id)));
-    query.exec(command);
-
     int currentQty, productId;
+    QString command;
     int playerId = getPlayerID(name);
-    if(playerId == -1){
-        return false;
-    }
-    if(!query.next()){
-        std::cout << "invalid item id" << std::endl;
-        return false;
-    }
+    if(id){
+        command = "SELECT `product_id`, `quantity` FROM `inventory` WHERE `id` = ";
+        command.append(convertToQstring(std::to_string(id)));
+        bool ret = query.exec(command);
 
-    if(qty > query.value(1).toInt()){ //said to get rid of too much
-        std::cout << "not enough in stock" << std::endl;
-        return false;
-    }
 
-    //remove qty from stock
-    productId = query.value(0).toInt();
-    currentQty = query.value(1).toInt();
-    command = "UPDATE `inventory` SET  `quantity` =  '";
-    command.append(convertToQstring(std::to_string(currentQty - qty)));
-    command.append("' WHERE  `inventory`.`id` =");
-    command.append(convertToQstring(std::to_string(id)));
-    if(!query.exec(command)){
-        std::cout << query.lastError().text().toStdString() << std::endl;
+
+        if(playerId == -1){
+            return false;
+        }
+        if(!query.next()){
+            std::cout << "invalid item id" << std::endl;
+            return false;
+        }
+
+        if(qty > query.value(1).toInt()){ //said to get rid of too much
+            std::cout << "not enough in stock" << std::endl;
+            return false;
+        }
+
+        //remove qty from stock
+        productId = query.value(0).toInt();
+        currentQty = query.value(1).toInt();
+        command = "UPDATE `inventory` SET  `quantity` =  '";
+        command.append(convertToQstring(std::to_string(currentQty - qty)));
+        command.append("' WHERE  `inventory`.`id` =");
+        command.append(convertToQstring(std::to_string(id)));
+        if(!query.exec(command)){
+            std::cout << query.lastError().text().toStdString() << std::endl;
+        }
+    } else{
+        productId = productID;
     }
 
     //add it to the transactions

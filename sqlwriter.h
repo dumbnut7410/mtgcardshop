@@ -25,7 +25,7 @@ public:
     int addItemToDB(QString str);
     bool addPlayer(Player);
     void listInventory();
-    bool sellItem(int id, int qty, int price, std::string name);
+    bool sellItem(int id, int qty, int price, std::string name, int productID = 0);
     int getRevenue();
     int getCosts();
     void listTransactions();

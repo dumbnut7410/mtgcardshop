@@ -89,7 +89,8 @@ void handleEvents(){
             std::cout << "price paid: ";
         } while( !(std::cin >> price));
 
-        writer->registerForEvent(playerName, eventId, price);
+        if(writer->registerForEvent(playerName, eventId, price))
+            std::cout << playerName << " registered successfully!" << std::endl;
         break;
     }
 }
