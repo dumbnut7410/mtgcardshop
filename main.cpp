@@ -28,10 +28,15 @@ void fixUserInput(){
 }
 
 bool addEvent(){
-    std::string description;
+
+    char dInput[16];
+
 
     std::cout << "Enter description: ";
-    std::cin >> description;
+    std::cin.ignore();
+    std::cin.getline(dInput, 16);
+
+    std::string description = dInput;
 
     std::cout << "which items are sold with this event? (comma seperated) \n";
     writer->listPossibleItems();
@@ -57,10 +62,12 @@ void handleEvents(){
 
     switch(hashString(input.c_str())){
     case hashString("add"):
+    case hashString("1"):
         addEvent();
         break;
 
     case hashString("remove"):
+    case hashString("2"):
         int id;
         do{
 
@@ -74,6 +81,7 @@ void handleEvents(){
         break;
 
     case hashString("register"):
+    case hashString("3"):
         std::string playerName;
         int eventId, price;
 
@@ -288,6 +296,7 @@ int main(int argc, char *argv[])
             break;
 
         case hashString("sell"):
+        case hashString("sellitem"):
             sellItem();
 
             break;
@@ -317,6 +326,7 @@ int main(int argc, char *argv[])
             break;
 
         case hashString("event"):
+        case hashString("events"):
             handleEvents();
             break;
 

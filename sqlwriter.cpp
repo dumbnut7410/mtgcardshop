@@ -118,7 +118,7 @@ bool SQLWriter::registerForEvent(std::string playerName, int eventId, int price)
         return false;
     }
 
-    query.first();//not sure, this prevents an error from occuring on the next line
+    query.first();
 
     std::string playerCSV = query.value(0).toString().toStdString();
     std::vector<int> registeredIDS = this->CSVParse(playerCSV);
@@ -142,10 +142,8 @@ bool SQLWriter::registerForEvent(std::string playerName, int eventId, int price)
 
     /* charge the player */
 
-
-
     //get event description to find the product
-    command = "SELECT `description` FROM `events` WHERE `id` = ";
+    command = "SELECT `description`, `items` FROM `events` WHERE `id` = ";
     command.append(std::to_string(eventId));
     ret = query.exec(convertToQstring(command));
 
@@ -155,6 +153,7 @@ bool SQLWriter::registerForEvent(std::string playerName, int eventId, int price)
     }
     query.first();
     std::string description = query.value(0).toString().toStdString();
+    std::string items = query.value(1).toString().toStdString();
 
 
     //get product id
@@ -172,6 +171,14 @@ bool SQLWriter::registerForEvent(std::string playerName, int eventId, int price)
     int productID = query.value(0).toInt();
     this->sellItem(0,1,price,playerName, productID);
 
+    /* remove items from inventory */
+
+    std::vector<int> itemlist = this->CSVParse(items);
+    for(int i : itemlist){
+        command = "UPDATE `inventory` SET  quantity  =  quantity - 1 WHERE `id` = ";
+        command.append(std::to_string(i));
+        query.exec(convertToQstring(command));
+    }
 
 
     return true;
