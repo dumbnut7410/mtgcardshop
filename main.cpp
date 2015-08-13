@@ -52,9 +52,10 @@ bool addEvent(){
 void handleEvents(){
 
     std::cout << "What would you like to do: \n"
+              << "register \n"
+              << "list \n"
               << "add \n"
               << "remove \n"
-              << "register"
               << std::endl;
 
     std::string input;
@@ -62,12 +63,12 @@ void handleEvents(){
 
     switch(hashString(input.c_str())){
     case hashString("add"):
-    case hashString("1"):
+    case hashString("3"):
         addEvent();
         break;
 
     case hashString("remove"):
-    case hashString("2"):
+    case hashString("4"):
         int id;
         do{
 
@@ -80,8 +81,13 @@ void handleEvents(){
         writer->removeEvent(id);
         break;
 
+    case hashString("list"):
+        case hashString("2"):
+            writer->listEvents();
+            break;
+
     case hashString("register"):
-    case hashString("3"):
+    case hashString("1"):
         std::string playerName;
         int eventId, price;
 
@@ -100,6 +106,8 @@ void handleEvents(){
         if(writer->registerForEvent(playerName, eventId, price))
             std::cout << playerName << " registered successfully!" << std::endl;
         break;
+
+
     }
 }
 

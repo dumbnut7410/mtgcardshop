@@ -21,7 +21,7 @@ std::vector<int> SQLWriter::CSVParse(std::string ids){
         char c= '$';
         std::string tmp = "";
         int k = 0;
-        while(c != ','){
+        while(c != ',' || c != '\000'){
             c = ids[i+k];
             if(c == ',')
                 break;
@@ -74,15 +74,45 @@ bool SQLWriter::addEvent(std::string description, std::string items){
 
 void SQLWriter::listEvents(){
     QSqlQuery query;
-    std::string command = "SELECT `id`, `description` FROM `events`";
+    std::string command;
+
+    //getting a map of players so we can translate ids later
+    std::map<int, std::string> players;
+
+    command = "SELECT `id`, `name` FROM `players`";
+    query.exec(convertToQstring(command));
+
+    while(query.next()){
+        players[query.value(0).toInt()] = query.value(1).toString().toStdString();
+    }
+
+
+    //getting event info
+    command = "SELECT `id`, `description`, `players` FROM `events`";
 
     bool ret = query.exec(convertToQstring(command));
+
+
 
     if(!ret)
         std::cout << query.lastError().text().toStdString();
     else
         while(query.next()){
-            std::cout << query.value(0).toString().toStdString() << ". " << query.value(1).toString().toStdString() << std::endl;
+            //get players
+            std::vector<int> playerids = this->CSVParse(query.value(2).toString().toStdString());
+
+            //print "id. descripton:
+            std::cout << query.value(0).toString().toStdString() << ". "
+                      << query.value(1).toString().toStdString()
+                      << ": ";
+
+            //print off a list of the players
+            for(int i: playerids){
+                std::cout << players[i] << ", ";
+            }
+
+            std::cout << std::endl;
+
         }
 }
 
@@ -131,8 +161,8 @@ bool SQLWriter::registerForEvent(std::string playerName, int eventId, int price)
     }
 
     /* actually register the player */
-    playerCSV.append(",");
     playerCSV.append(std::to_string(playerid));
+    playerCSV.append(",");
     command = "UPDATE `events` SET `players` = '";
     command.append(playerCSV);
     command.append("' WHERE `events`.`id` = ");
