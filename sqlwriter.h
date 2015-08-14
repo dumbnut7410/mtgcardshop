@@ -22,7 +22,7 @@ public:
 
     void listPossibleItems(void);
     void addItemToInventory(inventoryItem);
-    int addItemToDB(QString str);
+    int addItemToDB(QString str, int hide = 0);
     bool addPlayer(Player);
     void listInventory();
     bool sellItem(int id, int qty, int price, std::string name, int productID = 0);
@@ -43,6 +43,7 @@ public:
 
     bool registerForEvent(std::string playerName, int eventID, int price);
 
+    bool refundTransaction(int id);
     std::vector<int> CSVParse(std::string ids);
 private:
 

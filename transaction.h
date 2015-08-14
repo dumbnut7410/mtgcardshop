@@ -2,6 +2,7 @@
 #define TRANSACTION
 #include <qdatetime.h>
 struct transaction{
+    int id;
     int playerID;
     int itemID;
     int qty;

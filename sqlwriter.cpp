@@ -221,7 +221,7 @@ void SQLWriter::listPossibleItems(){
     QSqlQuery query;
 
     //check to se if the item was already in the database
-    std::string command = "SELECT * FROM `products` WHERE 1";
+    std::string command = "SELECT * FROM `products` WHERE `hidden` = 0";
 
     query.exec(convertToQstring(command));
 
@@ -281,18 +281,25 @@ void SQLWriter::addItemToInventory(inventoryItem item){
  * @param str name of item to add
  * @return id number of the new item
  */
-int SQLWriter::addItemToDB(QString str){
+int SQLWriter::addItemToDB(QString str, int hide){
     QSqlQuery query;
+    bool ret;
 
-    QString command = "INSERT INTO `products` (`id`, `name`) VALUES (NULL, '";
+    QString command = "INSERT INTO `products` (`id`, `name`, `hidden`) VALUES (NULL, '";
     command.append(str);
-    command.append("')");
-    query.exec(command);
+    command.append("',");
+    command.append(convertToQstring(std::to_string(hide)));
+    command.append(")");
+    ret = query.exec(command);
+
+    if(!ret){
+        std::cout << query.lastError().text().toStdString() << std::endl;
+    }
 
     command = "SELECT `id` FROM `products` WHERE `name` LIKE '";
     command.append(str);
     command.append("'");
-    query.exec(command);
+    ret = query.exec(command);
     query.next();
 
     return query.value(0).toInt();
@@ -346,7 +353,9 @@ bool SQLWriter::sellItem(int id, int qty, int price, std::string name, int produ
         command.append(convertToQstring(std::to_string(id)));
         bool ret = query.exec(command);
 
-
+        if(!ret){
+            std::cout << query.lastError().text().toStdString() << std::endl;
+        }
 
         if(playerId == -1){
             return false;
@@ -469,7 +478,7 @@ void SQLWriter::listInventory(){
         index++;
     }
 
-    for(int i = 0; i < ids.size(); i++){
+    for(unsigned int i = 0; i < ids.size(); i++){
         int lineLength = 28;
         lineLength -= names[ids[i]].length();
         lineLength -= std::to_string(qty[i]).length();
@@ -526,6 +535,7 @@ void SQLWriter::listTransactions(){
 
     while(query.next()){ //getting transactions
         transaction t;
+        t.id = query.value(0).toInt();
         t.playerID = query.value(1).toInt();
         t.itemID = query.value(2).toInt();
         t.qty = query.value(3).toInt();
@@ -550,14 +560,15 @@ void SQLWriter::listTransactions(){
         players[query.value(0).toInt()] = query.value(1).toString().toStdString();
     }
 
-    std::cout << "qty \t item name \t player \t total \t time " << std::endl;
+    printf("%-3s\t%-5s%-12s%-8s$%-8s\t%-16s\n", "id", "qty", "name", "player", "total", "time");
+    std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
     for(transaction t: xactions){
-        std::cout << t.qty << "\t";
-        std::cout << products[t.itemID] << "\t";
-        std::cout << players[t.playerID] << "\t";
-        printf("$%.2f \t", t.totalPrice/100.0);
-        std::cout << t.dateTime.toString(Qt::TextDate).toStdString();
-        std::cout << "\n";
+
+        printf("%-3i\t%-5i%-12s%-8s$%-8.2f%-16s\n",
+               t.id, t.qty, products[t.itemID].c_str(),
+                players[t.playerID].c_str(), t.totalPrice/100.0,
+                t.dateTime.toString().toStdString().c_str());
+
     }
 
 
@@ -716,6 +727,53 @@ int SQLWriter::calculateEloChange(int elo1, int elo2, int wld){
     }
 
     throw -9001;
+}
+
+bool SQLWriter::refundTransaction(int id){
+    QSqlQuery query;
+    std::string command;
+    int qty,itemid;
+
+    //getting what was sold
+    command = "SELECT `item_id`, `quantity` FROM `transactions` WHERE `id` = ";
+    command.append(std::to_string(id));
+
+    bool ret = query.exec(convertToQstring(command));
+
+    if(!ret){
+        std::cout << query.lastError().text().toStdString() << std::endl;
+        return false;
+    }
+    query.first();
+
+    qty = query.value(1).toInt();
+    itemid = query.value(0).toInt();
+
+    //removing transaciton
+    command = "DELETE from `transactions` WHERE `id` = ";
+    command.append(std::to_string(id));
+
+    ret = query.exec(convertToQstring(command));
+
+    if(!ret){
+        std::cout << query.lastError().text().toStdString() << std::endl;
+        return false;
+    }
+
+    //adding item to inventory
+    command = "UPDATE `inventory` SET  quantity  =  quantity + ";
+    command.append(std::to_string(qty));
+    command.append(" WHERE `id` = ");
+    command.append(std::to_string(itemid));
+
+    ret = query.exec(convertToQstring(command));
+
+    if(!ret){
+        std::cout << query.lastError().text().toStdString() << std::endl;
+        return false;
+    }
+    return true;
+
 }
 
 SQLWriter::~SQLWriter()

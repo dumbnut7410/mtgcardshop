@@ -27,6 +27,17 @@ void fixUserInput(){
     std::cin.clear();
 }
 
+void refund(){
+    int xactionid;
+    writer->listTransactions();
+    do{
+        fixUserInput();
+        std::cout << "transactions id: ";
+    }while(!(std::cin >> xactionid));
+    writer->refundTransaction(xactionid);
+
+}
+
 bool addEvent(){
 
     char dInput[16];
@@ -46,7 +57,7 @@ bool addEvent(){
 
     writer->addEvent(description, items);
 
-
+    return true;
 }
 
 void handleEvents(){
@@ -277,7 +288,7 @@ void handleElo(){
     writer->changeElo(player1, player2, wld);
 }
 
-int main(int argc, char *argv[])
+int main()
 {
 //    QCoreApplication a(argc, argv);
 
@@ -338,8 +349,13 @@ int main(int argc, char *argv[])
             handleEvents();
             break;
 
+        case hashString("inventory"):
+            writer->listInventory();
+            break;
 
-
+        case hashString("refund"):
+            refund();
+            break;
         case hashString("help"):
             std::cout << "possible commands: \n"
                       << "additem \n"
@@ -349,7 +365,8 @@ int main(int argc, char *argv[])
                       << "transactions \n"
                       << "playerlookup \n"
                       << "standings \n"
-                      << "event"
+                      << "event \n"
+                      << "inventory"
                       << std::endl;
             break;
 
