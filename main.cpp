@@ -21,12 +21,40 @@ constexpr unsigned int hashString(const char* str, int h = 0){
     return !str[h] ? 5381 : (hashString(str, h+1)*33) ^ str[h];
 }
 
-
+/**
+ * @brief fixUserInput fixes weird bugs because I do not know what I am doing
+ */
 void fixUserInput(){
     std::cin.ignore(0,9001);
     std::cin.clear();
 }
 
+/**
+ * @brief setElo collects user input and sets an existing players elo
+ */
+void setElo(){
+    int id, elo;
+    std::string name;
+
+    do{
+        fixUserInput();
+        std::cout << "player name: ";
+    } while(!(std::cin >> name));
+
+    do{
+        fixUserInput();
+        std::cout << "elo: ";
+    } while(!(std::cin >> elo));
+
+    id = writer->getPlayerID(name);
+
+    writer->setElo(id, elo);
+
+}
+
+/**
+ * @brief refund prompts for transaction id then adds the item to inventory and refunds the purchase to a player
+ */
 void refund(){
     int xactionid;
     writer->listTransactions();
@@ -38,6 +66,10 @@ void refund(){
 
 }
 
+/**
+ * @brief addEvent collects information and adds an event to the database
+ * @return true always
+ */
 bool addEvent(){
 
     char dInput[16];
@@ -60,6 +92,9 @@ bool addEvent(){
     return true;
 }
 
+/**
+ * @brief handleEvents handles input and manages events
+ */
 void handleEvents(){
 
     std::cout << "What would you like to do: \n"
@@ -151,6 +186,11 @@ void addPlayer(){
     else
         std::cout << "operation failed" << std::endl;
 }
+
+/**
+ * @brief addItemToDB used to add a new item to the database
+ * @return id number of newly added item
+ */
 int addItemToDB(){
     char name[16];
 
@@ -201,10 +241,16 @@ void addItemToInventory(){
     writer->addItemToInventory(ITEM);
 
 }
+/**
+ * @brief printStandingsprints a numerical ordered list of player elo
+ */
 void printStandings(){
     writer->printelostandings();
 }
 
+/**
+ * @brief sellItem gathers input and processes the sell of an item
+ */
 void sellItem(){
     int itemId, qty;
     float price;
@@ -230,10 +276,16 @@ void sellItem(){
     writer->sellItem(itemId, qty, (int) (price * 100), name);
 }
 
+/**
+ * @brief listTransactions prints out a list of every transaction
+ */
 void listTransactions(){
     writer->listTransactions();
 }
 
+/**
+ * @brief listPNL prints revenue, costs, profit, jims expenses to the console
+ */
 void listPNL(){
     int revenue = writer->getRevenue();
     int costs = writer->getCosts();
@@ -251,6 +303,9 @@ void listPNL(){
 
 }
 
+/**
+ * @brief playerLookup prompts for player name and prints elo and lists transactions to console
+ */
 void playerLookup(){
     std::string name;
     std::cout << "Player name:";
@@ -271,6 +326,9 @@ void playerLookup(){
 
 }
 
+/**
+ * @brief handleElo prompts and handles input for a match elo change
+ */
 void handleElo(){
     std::string player1, player2;
     int wld;
@@ -355,6 +413,11 @@ int main()
 
         case hashString("refund"):
             refund();
+            break;
+
+        case hashString("setelo"):
+        case hashString("setElo"):
+            setElo();
             break;
         case hashString("help"):
             std::cout << "possible commands: \n"

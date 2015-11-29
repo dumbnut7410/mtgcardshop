@@ -130,6 +130,28 @@ bool SQLWriter::removeEvent(int id){
     return true;
 }
 
+/**
+ * @brief getIdsAndQtyOfProductID gets the id values and quantity of all entries in the inventory table that have the given product_id
+ * @param product_id id value in the product table
+ * @return map<id, amount> of each entry in the inventory table with given product_id
+ */
+std::map<int, int> SQLWriter::getIdsAndQtyOfProductID(int product_id){
+    std::map<int, int> ret;
+    QSqlQuery query;
+    std::string command = "SELECT `id`, `quantity` FROM `inventory` WHERE `product_id` = ";
+
+    command.append(std::to_string(product_id));
+    query.exec(convertToQstring(command));
+
+    while(query.next()){
+        ret[query.value(0).toInt()] = query.value(1).toInt();
+    }
+
+    return ret;
+
+}
+
+
 bool SQLWriter::registerForEvent(std::string playerName, int eventId, int price){
     QSqlQuery query;
     std::string command;
@@ -206,13 +228,23 @@ bool SQLWriter::registerForEvent(std::string playerName, int eventId, int price)
     std::vector<int> itemlist = this->CSVParse(items);
     for(int i : itemlist){
         command = "UPDATE `inventory` SET  quantity  =  quantity - 1 WHERE `id` = ";
-        command.append(std::to_string(i));
+
+        std::map<int, int> inventory = getIdsAndQtyOfProductID(i);
+        //iterate through map
+        for(auto const &key : inventory) {
+            if(inventory[key.first] > 0){
+                command.append(std::to_string(key.first));
+                break;
+            }
+        }
+
         query.exec(convertToQstring(command));
     }
 
 
     return true;
 }
+
 
 /**
  * @brief SQLWriter::listPossibleItems provides a simple list of all items in the database
@@ -310,7 +342,7 @@ bool SQLWriter::addPlayer(Player p){
     std::string command = "INSERT INTO `players` (`id`, `name`, `elo`) VALUES (NULL, '";
     command.append(p.name);
     command.append("', '");
-    command.append(std::to_string(p.elo));
+    command.append("1400");
     command.append("');");
     QString qcommand = convertToQstring(command);
     bool ans = query.exec(qcommand);

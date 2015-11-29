@@ -20,6 +20,7 @@ public:
     SQLWriter();
     ~SQLWriter();
 
+
     void listPossibleItems(void);
     void addItemToInventory(inventoryItem);
     int addItemToDB(QString str, int hide = 0);
@@ -32,7 +33,10 @@ public:
     int listExpenses(std::string name, bool print);
     int getElo(std::string);
     bool changeElo(std::string, std::string, int);
-    bool setElo(int, int);
+
+
+
+    bool setElo(int id, int elo);
     int calculateEloChange(int, int, int);
     void printelostandings();
 
@@ -45,9 +49,12 @@ public:
 
     bool refundTransaction(int id);
     std::vector<int> CSVParse(std::string ids);
+    int getPlayerID(std::string);
+
 private:
 
-    int getPlayerID(std::string);
+    std::map<int, int> getIdsAndQtyOfProductID(int);
+
     bool createConnection();
 };
 
