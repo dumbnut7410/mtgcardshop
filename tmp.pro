@@ -21,11 +21,13 @@ LIBS += /opt/Qt/Tools/QtCreator/bin/plugins/sqldrivers/libqsqlite.so
 #LIBS += /usr/local/qt5pi/plugins/sqldrivers/libqsqlite.so
 
 SOURCES += main.cpp \
-    sqlwriter.cpp
+    sqlwriter.cpp \
+    challongereader.cpp
 
 HEADERS += \
     sqlwriter.h \
     player.h \
     inventoryItem.h \
     transaction.h \
-    event.h
+    event.h \
+    challongereader.h

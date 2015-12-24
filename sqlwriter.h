@@ -14,9 +14,8 @@ std::string getpass(const char*, bool);
 int getch(void);
 QString convertToQstring(std::string);
 
-class SQLWriter
-{
-public:
+class SQLWriter {
+  public:
     SQLWriter();
     ~SQLWriter();
 
@@ -51,7 +50,7 @@ public:
     std::vector<int> CSVParse(std::string ids);
     int getPlayerID(std::string);
 
-private:
+  private:
 
     std::map<int, int> getIdsAndQtyOfProductID(int);
 
