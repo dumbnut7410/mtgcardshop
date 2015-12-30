@@ -32,8 +32,10 @@ class SQLWriter {
     int listExpenses(std::string name, bool print);
     int getElo(std::string);
     bool changeElo(std::string, std::string, int);
+    void decayElo(std::string players, int amount);
 
-
+    std::map<std::string, int> getAllPlayers();
+    int getAllPlayers(std::string*);
 
     bool setElo(int id, int elo);
     int calculateEloChange(int, int, int);

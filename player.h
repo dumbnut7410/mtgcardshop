@@ -3,9 +3,9 @@
 #include <string>
 
 
-struct Player{
-    std::string name;
-    int elo;
+struct Player {
+  std::string name;
+  int elo;
 };
 
 
