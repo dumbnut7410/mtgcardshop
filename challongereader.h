@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 #include <map>
-#include <curl/curl.h>
+#include "./curl/curl.h"
 #include "rapidjson/document.h"
 
 #define DEFAULT_API_KEY_PATH  "./apiKey.txt"

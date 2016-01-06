@@ -361,7 +361,7 @@ bool SQLWriter::addPlayer(Player p) {
 bool SQLWriter::createConnection() {
   QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
 //    db.setHostName("~/Desktop/cards.db");
-  db.setDatabaseName("/var/shop/cards.db");
+  db.setDatabaseName("./cards.db");
 //    db.setUserName("root");
 //    db.setPassword(pass);
   if (!db.open()) {
